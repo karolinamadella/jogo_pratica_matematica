@@ -1,0 +1,623 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="utf-8">
+		<title>Prática Matemática</title>
+		<link rel="shortcut icon" type="image/x-icon" href="favicon.ico">
+		<script type="text/javascript">
+		
+			var campoNum1;
+			var campoNum2;
+			var campoRes;
+			var num1Sort, num2Sort, num3Sort;
+			var resultadoCorreto;
+			var resultadoUsuario;
+			var erros=0;
+			var acertos=0;
+			var saldo=0;
+			var centesimos=0;
+			var segundos=0;
+			var minutos=0;
+			var nivelSorteio=1;
+			var tipoJogo=3;
+			var i=1;
+			var tabuada;
+			var codigoGeral;
+			var Mp;
+			var pontuacao;
+		
+			function inicio(){				
+
+				
+				campoNum1=document.getElementById("num1");
+				campoNum2=document.getElementById("num2");
+				campoRes=document.getElementById("res");
+				nivelSorteio=parseInt(prompt("Qual o nível do jogo? Digite 1 para fácil ou 2 para difícil"));
+				tipoJogo=parseInt(prompt("Qual o tipo do jogo? Digite 2 para preencher o campo 2, 3 para o campo 3 e 4 para praticar a tabuada"));
+				pontos=acertos-erros;
+				localStorage.setItem("saldo", pontos);
+				sorteio();
+				play();
+				
+				
+			
+			}
+			
+			function verificar(){
+				if(campoNum1.value!="" && campoNum2.value!="" && campoRes.value!="" && tipoJogo!=4){
+					if (tipoJogo==2){
+						resultadoUsuario=parseInt(campoNum2.value);
+					}else if (tipoJogo==3){
+						resultadoUsuario=parseInt(campoRes.value);
+					}
+					
+					if(resultadoUsuario==resultadoCorreto){
+						acertos = acertos+1;
+						sorteio();
+						zerarCampo();
+						
+						if (acertos==10 || segundos==30){
+							alert("Jogo Finalizado. Cadestre o seu nome para participar do Ranking" );
+							//localStorage.setItem("saldo", acertos-erros);
+							
+							if(erros==0 && acertos==10){
+								alert("Parabéns, você não errou nenhum valor");
+								//localStorage.setItem("saldo", acertos-erros);
+								
+							}else if(erros==3){
+								alert("Quase lá");
+								//localStorage.setItem("saldo", acertos-erros);
+								
+							}
+	
+							zerarMarcador();
+						
+					}
+					
+					
+					}else if(campoRes.value!="" && campoNum2.value!=""){
+						erros += 1;
+						zerarCampo();
+					}
+				
+					marcador();
+					
+				}else if(campoNum1.value!="" && campoNum2.value!="" && campoRes.value!="" && tipoJogo==4){
+						resultadoUsuario=parseInt(campoRes.value);
+						
+												
+						if(resultadoUsuario==resultadoCorreto){
+							acertos = acertos+1;
+							campoRes.value="";
+							i+=1;
+							sorteioTabuada();
+							
+							if (acertos==10 || segundos==30){
+								alert("Jogo Finalizado. Cadestre o seu nome para participar do Ranking" );
+								
+								if(erros==0 && acertos==10){
+									alert("Parabéns, você não errou nenhum valor");
+									
+								}else if(erros==3){
+									alert("Quase lá");
+									
+								}
+		
+								zerarMarcador();
+						
+						}
+					
+					
+					}else if(campoRes.value!="" && campoNum2.value!=""){
+						erros += 1;
+						campoRes.value="";
+						campoRes.focus();
+					
+					}
+					marcador();				
+				}					
+			}
+			
+			function sorteio(){
+				if(nivelSorteio==1 && tipoJogo==3){
+					sorteioFacil3();
+				}else if(nivelSorteio==2 && tipoJogo==3){
+					sorteioDificil3();
+				}else if (nivelSorteio==1 && tipoJogo==2){
+					sorteioFacil2();
+				}else if (nivelSorteio==2 && tipoJogo==2){
+					sorteioDificil2();
+				}else if (tipoJogo==4){
+					tabuada();
+				}
+				else{
+					alert("Nível inválido!")
+				}
+			}
+			
+			
+			function zerarCampo(){
+				if (tipoJogo==3){
+					campoRes.value="";
+					campoRes.focus();
+				}else if (tipoJogo==2){
+					campoNum2.value="";
+					campoNum2.focus();
+				} 
+			
+			}
+			
+			function sorteioFacil3(){
+				num1Sort = parseInt(Math.random()*11);
+				num2Sort = parseInt(Math.random()*11);
+				operacao3();
+				campoNum1.value=num1Sort;
+				campoNum2.value=num2Sort;
+				campoRes.focus();
+			
+			}
+			function sorteioDificil3(){
+				num1Sort = parseInt(Math.random()*21);
+				num2Sort = parseInt(Math.random()*11);
+				operacao3();
+				campoNum1.value=num1Sort;
+				campoNum2.value=num2Sort;
+				campoRes.focus();
+			
+			}
+			
+			function sorteioFacil2(){
+				num1Sort = parseInt(Math.random()*11);
+				num3Sort = parseInt(Math.random()*11);
+				operacao2();
+				campoNum1.value=num1Sort;
+				campoRes.value=num3Sort;
+				campoNum2.focus();
+			}
+			function sorteioDificil2(){
+				num1Sort = parseInt(Math.random()*21);
+				num3Sort = parseInt(Math.random()*11);
+				operacao2();
+				campoNum1.value=num1Sort;
+				campoRes.value=num3Sort;
+				campoNum2.focus();
+			}
+			
+			function sorteioTabuada(){
+				
+				campoNum1.value=i;
+				campoNum2.value=tabuada;
+				campoRes.focus();
+				resultadoCorreto = i*tabuada;
+				//alert("resultado correto: "+resultadoCorreto);
+			}
+			
+			
+			function operacao3(){
+			//neste tipo de jogo existe a opção de soma ,subtracao e multiplicacao
+				var operador = parseInt(Math.random()*3);
+				var labelOperador=document.getElementById("operadorMatematico");
+				if(operador==0){
+					resultadoCorreto = num1Sort+num2Sort;
+					labelOperador.innerHTML=" + "
+				}else if(operador==1){
+					resultadoCorreto = num1Sort-num2Sort;
+					labelOperador.innerHTML=" - "
+				}else{
+					resultadoCorreto = num1Sort*num2Sort;
+					labelOperador.innerHTML=" X "
+				}
+			}
+			
+			
+			function operacao2(){
+			//neste tipo de jogo existe apenas a opção de soma e subtracao
+				var operador = parseInt(Math.random()*2);
+				var labelOperador=document.getElementById("operadorMatematico");
+				if(operador==0){
+					resultadoCorreto = num3Sort-num1Sort;
+					labelOperador.innerHTML=" + "
+				}else{
+					resultadoCorreto = num1Sort-num3Sort;
+					labelOperador.innerHTML=" - "
+				}
+			}
+			
+			function tabuada(){
+				
+				tabuada=parseInt(prompt("Qual tabuada deseja treinar?"));
+				
+				
+				var labelOperador=document.getElementById("operadorMatematico");
+				
+				labelOperador.innerHTML=" X "
+				campoNum1=document.getElementById("num1");
+				campoNum2=document.getElementById("num2");
+				campoRes=document.getElementById("res");
+							
+				play();
+				
+				sorteioTabuada();
+					
+			}
+			function marcador(){
+				labelErros = document.getElementById("erros");
+				labelErros.innerHTML = "Erros: "+erros;
+				
+				labelAcertos = document.getElementById("acertos");
+				labelAcertos.innerHTML = "Acertos: "+acertos;
+				
+				labelSaldo = document.getElementById("saldo");
+				labelSaldo.innerHTML = "Saldo: " +(acertos-erros);
+				var pontos=0;
+				pontos=pontos+acertos-erros;
+				if(segundos>0){
+				localStorage.setItem("saldo", pontos);
+				}
+			}
+			
+			function zerarMarcador(){
+				erros =0;
+				acertos =0;
+				campoNum1.value="";
+				campoNum2.value="";
+				clearInterval(intervalo);
+				intervalo=null;
+				centesimos=0;
+				segundos=0;
+				minutos=0;
+				document.getElementById("segundos").innerHTML="00";
+				document.getElementById("centesimos").innerHTML="00";
+				document.getElementById("minutos").innerHTML="00";
+				marcador();
+			}
+
+			
+			function cronometro(){
+				centesimos++;
+				if(centesimos==100){
+					segundos++;
+					centesimos=0;
+				}
+				if(segundos==60){
+					minutos++;
+					segundos=0;
+				}
+				
+				if (acertos==10 || segundos==30){
+					alert("Jogo Finalizado. Cadestre o seu nome para participar do Ranking" );
+					if(erros==0 && acertos==10){
+						alert("Parabéns, você não errou nenhum valor");
+						//localStorage.setItem("saldo", acertos-erros);
+					}else if(erros==3){
+						alert("Quase lá");
+						//localStorage.setItem("saldo", acertos-erros);
+					}
+
+					zerarMarcador();
+				}
+				
+				document.getElementById("segundos").innerHTML=segundos;
+				document.getElementById("centesimos").innerHTML=centesimos;
+				document.getElementById("minutos").innerHTML=minutos;
+			}
+			var intervalo=null;
+			function play(){
+				if(intervalo==null){
+				intervalo=setInterval("cronometro()",10);
+				}
+			}
+			function stop(){
+				zerarMarcador();
+				pontos=acertos-erros;
+				localStorage.setItem("saldo", pontos);
+						
+			}
+			
+			//INÍCIO CÓDIGO PARA O RANKING
+			
+			function enviarDados(){
+			//var codigo=document.getElementById("codigo").value;
+			codigoGeral++;
+			var codigo=codigoGeral;
+			var nome=document.getElementById("nome").value;
+			var idade=parseInt(document.getElementById("idade").value);
+			//var pontuacao=parseInt(document.getElementById("pontuacao").value);
+			var pontuacao=localStorage.getItem("saldo");
+			
+			//var p = new Object();
+			//p.codigo=codigo;
+			//p.nome=nome;
+			//p.idade=idade;
+			var p={"codigo": codigo, "nome": nome, "idade": idade, "pontuacao": pontuacao};
+			
+			
+			//atribuir p à matiz de pessoas
+			Mp.push(p);
+			
+			//salvar Mp no localstorage
+			salvar();
+			
+			//montar tabela com os elementos			
+			montarTabelaHTML();
+		}
+		
+		function salvar(){
+			var MpTXT=JSON.stringify(Mp);
+			localStorage.setItem("dados", MpTXT);
+			
+			//mandar salvar o código geral
+			localStorage.setItem("codigoGeral", codigoGeral);
+			
+		}
+		
+		function montarTabelaHTML(){
+			var linhas="";
+			for(var i=0; i<Mp.length; i++){
+				var pessoa = Mp[i];
+				linhas+="<tr>";
+				linhas+="<td>"+pessoa.codigo+"</td>";
+				linhas+="<td>"+pessoa.nome+"</td>";
+				linhas+="<td>"+pessoa.idade+"</td>";
+				linhas+="<td>"+pessoa.pontuacao+"</td>";
+				linhas+="<td><a href='javascript:void(0)' onclick='excluir("+i+")'>Excluir</a></td>"
+				linhas+="<tr>";
+			}
+			//enviar as linhas para o tbody da table
+			var tbody = document.getElementById("lista");
+			tbody.innerHTML=linhas;
+			
+		}
+		
+		function init(){
+			var dadosTXT=localStorage.getItem("dados");
+			Mp=JSON.parse(dadosTXT);
+			if(Mp==null){
+				Mp = [];
+			}
+			montarTabelaHTML();
+			
+			//resgatar o codigo geral
+			codigoGeral=localStorage.getItem("codigoGeral");
+			if(codigoGeral==null){
+				codigoGeral=0;
+			}
+		}
+		
+		function limparDados(){
+			Mp=[];
+			salvar();
+			//montarTabelaHTML(); ->uma opção de apagar os dados
+			document.getElementById("lista").innerHTML="";
+		}
+		
+		function excluir(indice){
+			//resgatar a pessoa pelo indice
+			var pessoa=Mp[indice];
+			var confirma=confirm("Excluindo pessoa "+pessoa.nome);
+			if(confirma==true){
+				//remove o elemento de Mp pelo indice
+				Mp.splice(indice,1);
+			}
+			salvar();
+			montarTabelaHTML();
+		}
+		
+	
+		function pesquisarNome(){
+			var nomePesq = prompt("Qual o nome a pesquisar?");
+			var Mres = [];
+			for(var i=0; i<Mp.length; i++){
+				if(Mp[i].nome == nomePesq){
+					Mres.push(Mp[i]);
+				}
+			}
+			
+			montarTabelaPesquisa(Mres);
+		}
+		
+		function pesquisarLetra(){
+			var letraPesq = prompt("Qual a letra a pesquisar?");
+			var Mres = [];
+			 
+			for(var i=0; i<Mp.length; i++){
+				if(Mp[i].nome[0] == letraPesq){
+					Mres.push(Mp[i]);
+				}
+			}
+			
+			montarTabelaPesquisa(Mres);
+		}
+		
+		function pesquisarCodigo(){
+			var codigoPesq = prompt("Qual o código a pesquisar?");
+			var Mres = [];
+			for(var i=0; i<Mp.length; i++){
+				if(Mp[i].codigo == codigoPesq){
+					Mres.push(Mp[i]);
+				}
+		}
+			
+			montarTabelaPesquisa(Mres);
+		}
+		
+		function montarTabelaPesquisa(Mres){
+			var linhas = "";
+			for(var i=0; i<Mres.length; i++){
+				var pessoa = Mres[i];
+				linhas += "<tr>";
+				//linhas += "<td>"+i+"</td>";
+				linhas += "<td>"+pessoa.codigo+"</td>";
+				linhas += "<td>"+pessoa.nome+"</td>";
+				linhas += "<td>"+pessoa.idade+"</td>";
+				linhas += "<td>"+pessoa.pontuacao+"</td>";
+				linhas += "<td><a href='javascript:void(0)' onclick='excluir("+i+")'>Excluir</a></td>";
+				linhas += "</tr>";
+			}
+			var tbody = document.getElementById("lista");
+			tbody.innerHTML = linhas;
+		}
+		
+		function limparPesquisa(){
+			montarTabelaHTML();
+		}
+		var ordem=1;
+		function ordenarPontuacao() {  
+		    var len = Mp.length;
+		    var Mo = [];
+		    if(ordem==1){
+			    for (var i=0; i<Mp.length; i++) {
+			        var tmp = Mp[i]; //Copy of the current element. 
+			        /*Check through the sorted part and compare with the number in tmp. 
+			        If large, shift the number*/
+			        for (var j = i - 1; j >= 0 && (Mp[j].pontuacao > tmp.pontuacao); j--) {
+			            //Shift the number
+			            Mp[j + 1] = Mp[j];
+			        }
+			        //Insert the copied number at the correct position
+			        //in sorted part. 
+			        Mp[j + 1] = tmp;
+			    }
+			    ordem=2;
+		    }else{
+			    for (var i=0; i<Mp.length; i++) {
+			        var tmp = Mp[i]; //Copy of the current element. 
+			        /*Check through the sorted part and compare with the number in tmp. 
+			        If large, shift the number*/
+			        for (var j = i - 1; j >= 0 && (Mp[j].pontuacao < tmp.pontuacao); j--) {
+			            //Shift the number
+			            Mp[j + 1] = Mp[j];
+			        }
+			        //Insert the copied number at the correct position
+			        //in sorted part. 
+			        Mp[j + 1] = tmp;
+			    }
+			    ordem=1;
+		    }
+		    
+		    montarTabelaHTML();
+		}
+		
+		function montarTabelaOrdenada(){
+			var linhas = "";
+			for(var i=0; i<Mp.length; i++){
+				var pessoa = Mo[i];
+				linhas += "<tr>";
+				//linhas += "<td>"+i+"</td>";
+				linhas += "<td>"+pessoa.codigo+"</td>";
+				linhas += "<td>"+pessoa.nome+"</td>";
+				linhas += "<td>"+pessoa.idade+"</td>";
+				linhas += "<td>"+pessoa.pontuacao+"</td>";
+				linhas += "<td><a href='javascript:void(0)' onclick='excluir("+i+")'>Excluir</a></td>";
+				linhas += "</tr>";
+			}
+			var tbody = document.getElementById("lista");
+			tbody.innerHTML = linhas;
+		}
+		
+		function premio(){
+			var soma=0;
+			var MpremiosA=["Tablet","Smartphone","Notebook"];
+			var MpremiosB=["Caderno","Lápis","Caneta"];
+			var sorteio = parseInt(Math.random()*3);
+			for(var i=0; i<Mp.length; i++){
+				soma=soma+Mp[i].pontuacao;
+			}
+			media=soma/Mp.length;
+			if(media>Mp[Mp.length-1].pontuacao){
+				alert("O prêmio sorteado para o jogador "+Mp[Mp.length-1].nome+" foi: "+MpremiosB[sorteio]);
+			}else{
+				alert("O prêmio sorteado para o jogador "+Mp[Mp.length-1].nome+" foi: "+MpremiosA[sorteio]);
+			}
+			
+		
+		}
+	
+		
+		</script>
+	</head>
+	<body onload="init()" background="background.png">
+		<h1>.::Prática Matemática::.</h1>
+		<button onclick="inicio()">INICIAR</button>
+		<br>
+		<input type="text" id="num1" onblur="verificar()">
+		<label id="operadorMatematico"> ... </label>
+		<input type="text" id="num2" onblur="verificar()">
+		<label> = </label>
+		<input type="text" id="res" onblur="verificar()">
+		<hr>
+		<label id="erros">Erros: 0</label>
+		<br>
+		<label id="acertos">Acertos: 0</label>
+		<br>
+		<label id="saldo">Saldo: 0</label>
+		<br>
+		<hr>
+		<label id="minutos">00</label>
+		:		
+		<label id="segundos">00</label>
+		:		
+		<label id="centesimos">00</label>
+		<hr>
+		<button onclick="stop()">Stop</button>
+		<hr>
+		<label id="marcadores"></label>
+				
+		
+		<h1>Cadastro dos Jogadores</h1>
+		
+		
+
+	
+		<div id="formulario">
+			<label>
+				Nome:
+				<input type="text" id="nome">
+			</label>
+			<br>
+			<label>
+				Idade:
+				<input type="text" id="idade">
+			</label>
+			<br>
+			<br>
+
+
+			<button onclick="enviarDados()">Registrar</button>
+			<br>
+			<br>
+			<button onclick="pesquisarNome()">Pesquisar Nome</button>
+			<button onclick="pesquisarLetra()">Pesquisar Letra</button>
+			<button onclick="pesquisarCodigo()">Pesquisar Código</button>
+			<br>
+			<br>
+			<button onclick="limparPesquisa()">Limpar Pesquisar</button>
+			<button onclick="limparDados()">Limpar Dados</button>
+			<br>
+			<br>
+			<button onclick="ordenarPontuacao()">Ordenar Pontuação</button>
+			<button onclick="premio()">Recolher Prêmio</button>
+
+		<hr>
+		</div>
+		<h1>Ranking dos Jogadores</h1>
+		
+		
+		<table border="1">
+			<thead>
+				<tr>
+					<th>Id</th>
+					<th>Nome</th>
+					<th>Idade</th>
+					<th>Pontuação</th>
+					<th>Excluir</th>
+				</tr>		
+			</thead>
+			<tbody id="lista">
+			
+			</tbody>	
+		</table>
+	
+	
+	</body>
+</html>
